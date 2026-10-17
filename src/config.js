@@ -17,8 +17,13 @@ export const DEFAULTS = Object.freeze({
   maxDraftChars: 4000,
   /** Total character budget for the project-facts block. */
   contextChars: 8000,
-  /** Character cap for the optimized prompt written back to the composer. */
-  maxOutputChars: 1200,
+  /**
+   * Character cap for the optimized prompt written back to the composer, in
+   * Chinese characters; the English ceiling scales to 1.8x. Concise by design:
+   * the meta prompt targets 75% of this and the hard cap only trims a runaway
+   * answer at a structural boundary.
+   */
+  maxOutputChars: 600,
   /** Per-call timeout, in milliseconds. */
   timeoutMs: 120000,
   /**

@@ -19,6 +19,36 @@ const FACT_LABELS = Object.freeze({
   en: Object.freeze({ cwd: 'Working directory', branch: 'Git branch', goal: 'Current session goal', excerpt: ' (excerpt)', separator: ': ' }),
 });
 
+/**
+ * Character ceiling for the returned text, per meta-prompt locale.
+ *
+ * `maxOutputChars` is defined in Chinese characters; the same information needs
+ * roughly 1.8x the characters in English, so the English ceiling scales. Keeping
+ * one number in config avoids the previous zh/en unit mismatch that made English
+ * output run far past the truncation point.
+ *
+ * @param {{ locale?: 'zh'|'en', maxOutputChars?: number }} input
+ * @returns {number} Ceiling in characters (<=0 disables capping).
+ */
+export function outputCeiling({ locale = 'zh', maxOutputChars = 600 } = {}) {
+  if (!(maxOutputChars > 0)) return 0;
+  return locale === 'en' ? Math.round(maxOutputChars * 1.8) : maxOutputChars;
+}
+
+/**
+ * Concise target written into the meta prompt: below the ceiling on purpose, so
+ * the model stops on its own instead of being truncated.
+ *
+ * @param {{ locale?: 'zh'|'en', maxOutputChars?: number }} input
+ * @returns {{ kind: 'chars'|'words', value: number }} Target in the locale's native unit.
+ */
+export function outputTarget({ locale = 'zh', maxOutputChars = 600 } = {}) {
+  const chars = Math.max(120, Math.floor(maxOutputChars * 0.75));
+  if (locale !== 'en') return { kind: 'chars', value: chars };
+  // A Chinese-character's worth of information is about 3.2 English words.
+  return { kind: 'words', value: Math.max(50, Math.round(chars / 3.2)) };
+}
+
 /** CJK test used to pick the meta-prompt language when the caller says `auto`. */
 const CJK_PATTERN = /[\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]/;
 
@@ -84,7 +114,8 @@ function zhSystem(maxOutputChars, detailed) {
     `4. 结构：按「${SECTION_ORDER.zh.join(' / ')}」分节，使用 Markdown 标题与条列；没有内容的小节直接省略，不要凑字数。`,
     '5. 可执行：验收标准必须可验证（具体命令、可观察行为、具体文件/接口），避免「尽量」「适当」「优化一下」这类空泛表述。',
     '6. 语言：与用户草稿语言一致（默认简体中文），术语沿用项目里已有的叫法。',
-    `7. 长度：不超过 ${Math.max(200, Math.floor(maxOutputChars * 0.6))} 字；信息密度优先。`,
+    `7. 篇幅：正文不超过 ${outputTarget({ locale: 'zh', maxOutputChars }).value} 字；每节最多 3 条，总条数不超过 10 条。`,
+    '   不写背景铺垫、不复述草稿原话、不重复同一约束；能删的词一律删掉。',
     '8. 只输出提示词正文：不要前言、不要解释你的思路、不要「以下是优化后的提示词」这类引导语、不要整段代码块围栏。',
   ].join('\n');
 }
@@ -109,7 +140,8 @@ function enSystem(maxOutputChars, detailed) {
     `4. Structure: use the sections "${SECTION_ORDER.en.join(' / ')}" as Markdown headings and bullets. Omit empty sections; never pad.`,
     '5. Executable: acceptance criteria must be verifiable (a concrete command, an observable behavior, a concrete file or endpoint). Avoid vague wording such as "reasonable", "appropriate", or "optimize it a bit".',
     '6. Language: write the prompt in the draft\'s language (English for English drafts), and reuse the terminology the project already uses.',
-    `7. Length: at most ${Math.max(120, Math.floor(maxOutputChars * 0.6))} words; information density first.`,
+    `7. Length: at most ${outputTarget({ locale: 'en', maxOutputChars }).value} words. At most 3 bullets per section and 10 bullets total.`,
+    '   No background preamble, no restating the draft, no duplicated constraints; cut every word that can go.',
     '8. Output the prompt body only: no preamble, no explanation of your reasoning, no "Here is the optimized prompt:", no wrapping code fence.',
   ].join('\n');
 }
@@ -179,11 +211,34 @@ export function finalizeOptimizedText(raw, maxChars = 1200) {
   }
   if (text.length === 0) return '';
 
-  if (maxChars > 0 && text.length > maxChars) {
-    text = `${text.slice(0, maxChars).trimEnd()}\n\n…(truncated; ${text.length} characters total)`;
-  }
+  if (maxChars > 0 && text.length > maxChars) text = cutAtBoundary(text, maxChars);
 
   return text;
+}
+
+/**
+ * Trim to a structural boundary instead of slicing mid-sentence.
+ *
+ * Prefers the last complete line, then a sentence end, then a word break, and
+ * only then a hard cut. The result is at most `maxChars + 1` characters (the
+ * ellipsis) and never carries explanatory text into the prompt body.
+ *
+ * @param {string} text - Text longer than the cap.
+ * @param {number} maxChars - Character cap.
+ * @returns {string} Trimmed text ending in an ellipsis.
+ */
+function cutAtBoundary(text, maxChars) {
+  const head = text.slice(0, maxChars);
+  const floor = maxChars * 0.5;
+  const boundaries = [
+    head.lastIndexOf('\n'),
+    Math.max(head.lastIndexOf('。'), head.lastIndexOf('！'), head.lastIndexOf('？'),
+      head.lastIndexOf('. '), head.lastIndexOf('; '), head.lastIndexOf('；')),
+    head.lastIndexOf(' '),
+  ];
+  const cut = boundaries.find((index) => index > floor);
+  const base = cut === undefined ? head : head.slice(0, cut);
+  return `${base.trimEnd()}…`;
 }
 
 /**

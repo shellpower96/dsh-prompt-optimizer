@@ -79,7 +79,7 @@ settings module of its own. Invalid values throw at activation with the field na
 | `enabled` | `true` | Master switch; `false` registers nothing |
 | `maxDraftChars` | `4000` | Reject longer drafts instead of sending them to the model |
 | `contextChars` | `8000` | Total character budget for the project-facts block |
-| `maxOutputChars` | `1200` | Cap for the optimized prompt written back to the composer |
+| `maxOutputChars` | `600` | Character cap for the optimized prompt, defined in Chinese characters; the English ceiling scales to 1.8x. The meta prompt targets 75% of it, so the hard cap only trims a runaway answer |
 | `timeoutMs` | `120000` | Per-call timeout |
 | `docs` | `["AGENTS.md","README.md"]` | Workspace-relative documents read as facts, in order; missing files are skipped, absolute paths and `..` are rejected |
 | `includeGoal` | `true` | Include the session's current goal in the facts block |
@@ -95,8 +95,25 @@ The meta prompt pins five properties (`src/prompt.js`):
 3. **Structured** — Goal / Current state and landing spot / Constraints and conventions / Task breakdown /
    Acceptance criteria; empty sections are dropped.
 4. **Executable** — acceptance criteria must be verifiable (a command, an observable behavior, a concrete file).
-5. **Body only** — no preamble, no reasoning, no code fence; `finalizeOptimizedText()` strips a fence or
+5. **Concise** — one length budget per locale, expressed in that locale's native unit (Chinese characters /
+   English words), plus a bullet discipline: at most 3 bullets per section and 10 in total, no background
+   preamble, no restating the draft, no duplicated constraints.
+6. **Body only** — no preamble, no reasoning, no code fence; `finalizeOptimizedText()` strips a fence or
    preamble the model adds anyway.
+
+### Length budget
+
+With the default `maxOutputChars: 600`:
+
+| Locale | Target written into the meta prompt | Hard ceiling on the result | Token budget |
+|---|---|---|---|
+| zh | 450 字 | 600 characters | 500 |
+| en | 141 words | 1080 characters | 900 |
+
+The target sits below the ceiling on purpose, so a compliant answer is never truncated. If a model
+overruns anyway, `finalizeOptimizedText()` cuts at the last complete line (falling back to a sentence
+end, then a word break, then a hard cut) and appends a single `…` — it never slices mid-sentence and
+never writes explanatory text into the prompt body.
 
 ## Layout
 
@@ -132,6 +149,8 @@ project-context regression that drives the plugin with a caller-declared `docs` 
   shared constant, and DSH rejects two registrations of the same name in one scope. Renaming it
   means editing `index.js` and `client.js` together.
 - **Not a tool**: the plugin changes no system prompt and adds no agent tool.
+- **Length is a soft promise plus one hard cut**: models are asked to stay inside the budget; the cap is
+  only a guard rail. Raising `maxOutputChars` raises both the target and the ceiling.
 - Verified against **DSH 0.2.0-rc.2**. No `peerDependencies` are declared on purpose: DSH blocks
   installation on an incompatible peer, which would be worse than a documented version note.
 

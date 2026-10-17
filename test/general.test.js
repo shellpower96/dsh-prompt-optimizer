@@ -148,7 +148,7 @@ test('config defaults are the documented ones', () => {
     enabled: true,
     maxDraftChars: 4000,
     contextChars: 8000,
-    maxOutputChars: 1200,
+    maxOutputChars: 600,
     timeoutMs: 120000,
     docs: ['AGENTS.md', 'README.md'],
     includeGoal: true,

@@ -9,7 +9,14 @@
  */
 
 import { collectProjectFacts } from './facts.js';
-import { buildPrompts, finalizeOptimizedText, parseDraft, renderFacts, selectPromptLocale } from './prompt.js';
+import {
+  buildPrompts,
+  finalizeOptimizedText,
+  outputCeiling,
+  parseDraft,
+  renderFacts,
+  selectPromptLocale,
+} from './prompt.js';
 
 /** User-facing failure copy. English by default; a draft in CJK gets the Chinese variant. */
 const MESSAGES = Object.freeze({
@@ -216,7 +223,10 @@ export async function optimizePrompt({ ctx, cfg, invocation }) {
     maxOutputChars: cfg.maxOutputChars,
   });
   const deadline = combineDeadline(invocation?.signal, cfg.timeoutMs);
-  const maxTokens = Math.min(2048, Math.max(512, cfg.maxOutputChars * 2));
+  // Token budget follows the character ceiling: ~1 token per character is enough
+  // for CJK and generous for English, so the model stops before the hard cap.
+  const ceiling = outputCeiling({ locale, maxOutputChars: cfg.maxOutputChars });
+  const maxTokens = Math.min(1024, Math.max(256, Math.ceil(ceiling / 1.2)));
 
   try {
     const { text, failure } = await streamCompletion(ctx.llm, {
@@ -234,7 +244,7 @@ export async function optimizePrompt({ ctx, cfg, invocation }) {
       return { kind: 'error', text: `${message(locale, 'PREFIX')}${failure.message}` };
     }
 
-    const optimized = finalizeOptimizedText(text, cfg.maxOutputChars);
+    const optimized = finalizeOptimizedText(text, ceiling);
     if (optimized.length === 0) return { kind: 'error', text: message(locale, 'EMPTY_RESULT') };
     return { kind: 'success', text: optimized };
   } catch (error) {

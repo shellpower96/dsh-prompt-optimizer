@@ -11,6 +11,8 @@ import { DEFAULTS, validateConfig } from '../src/config.js';
 import {
   buildPrompts,
   finalizeOptimizedText,
+  outputCeiling,
+  outputTarget,
   parseDraft,
   renderFacts,
   selectPromptLocale,
@@ -127,10 +129,54 @@ test('finalizeOptimizedText: keeps a normal first heading', () => {
   assert.equal(finalizeOptimizedText(raw, 1000), raw);
 });
 
-test('finalizeOptimizedText: caps long output', () => {
+test('finalizeOptimizedText: a single over-long line is hard-cut and marked', () => {
   const out = finalizeOptimizedText('y'.repeat(200), 50);
-  assert.ok(out.startsWith('y'.repeat(50)));
-  assert.match(out, /truncated; 200 characters total/);
+  assert.equal(out, `${'y'.repeat(50)}…`);
+  assert.ok(out.length <= 51);
+});
+
+test('finalizeOptimizedText: trims at the last complete line, not mid-sentence', () => {
+  const text = '## 目标\n加图形验证码\n## 约束\n' + '细节'.repeat(60);
+  const out = finalizeOptimizedText(text, 60);
+  assert.ok(out.endsWith('…'));
+  assert.ok(out.length <= 61);
+  // The cut lands on a line boundary, so the kept prefix is whole lines.
+  assert.match(out, /^## 目标\n加图形验证码\n/);
+  assert.doesNotMatch(out, /truncated/);
+});
+
+test('finalizeOptimizedText: never writes explanatory text into the prompt body', () => {
+  const out = finalizeOptimizedText('x'.repeat(300), 40);
+  assert.doesNotMatch(out, /truncated|characters total/);
+});
+
+test('outputCeiling: one config number, locale-scaled characters', () => {
+  assert.equal(outputCeiling({ locale: 'zh', maxOutputChars: 600 }), 600);
+  assert.equal(outputCeiling({ locale: 'en', maxOutputChars: 600 }), 1080);
+  assert.equal(outputCeiling({ locale: 'zh', maxOutputChars: 0 }), 0);
+  // Disabled capping.
+  assert.equal(outputCeiling({ locale: 'en', maxOutputChars: 0 }), 0);
+});
+
+test('outputTarget: native unit per locale, comfortably under the ceiling', () => {
+  assert.deepEqual(outputTarget({ locale: 'zh', maxOutputChars: 600 }), { kind: 'chars', value: 450 });
+  assert.deepEqual(outputTarget({ locale: 'en', maxOutputChars: 600 }), { kind: 'words', value: 141 });
+  // The target must stay below the ceiling so the hard cut is a last resort.
+  assert.ok(outputTarget({ locale: 'zh', maxOutputChars: 600 }).value < outputCeiling({ locale: 'zh', maxOutputChars: 600 }));
+});
+
+test('buildPrompts: Chinese length rule states the budget and the bullet discipline', () => {
+  const { system } = buildPrompts({ draft: '给登录加验证码', facts: '', locale: 'zh', maxOutputChars: 600 });
+  assert.match(system, /正文不超过 450 字/);
+  assert.match(system, /每节最多 3 条，总条数不超过 10 条/);
+  assert.match(system, /不写背景铺垫/);
+});
+
+test('buildPrompts: English length rule states the budget and the bullet discipline', () => {
+  const { system } = buildPrompts({ draft: 'add a captcha', facts: '', locale: 'en', maxOutputChars: 600 });
+  assert.match(system, /at most 141 words/);
+  assert.match(system, /At most 3 bullets per section and 10 bullets total/);
+  assert.match(system, /No background preamble/);
 });
 
 test('finalizeOptimizedText: empty output stays empty', () => {
