@@ -23,7 +23,7 @@ export const DEFAULTS = Object.freeze({
    * the meta prompt targets 75% of this and the hard cap only trims a runaway
    * answer at a structural boundary.
    */
-  maxOutputChars: 600,
+  maxOutputChars: 400,
   /** Per-call timeout, in milliseconds. */
   timeoutMs: 120000,
   /**

@@ -21,9 +21,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   "Fill composer" action) instead of the generic command card.
 - `Config` validation at activation that fails loudly and names the offending field.
 - Tests: public-API unit tests, no-project-context instantiation, and a caller-declared-context regression.
-- Concise output budget: one config number (`maxOutputChars`, default 600 Chinese characters) with a
-  locale-scaled ceiling (English 1.8x) and a native-unit target (450 字 / 141 words) plus a bullet
-  discipline (3 per section, 10 total).
+- Concise output budget: one config number (`maxOutputChars`, default **400** Chinese characters) with a
+  locale-scaled ceiling (English 1.8x) and a native-unit target (300 字 / 94 words) plus a bullet
+  discipline (3 per section, 10 total). Every default in `src/prompt.js` derives from that one value.
 - Boundary-safe trimming: an over-long answer is cut at the last complete line, then a sentence end,
   then a word break, and only then hard-cut, ending in a single `…` instead of an English
   "(truncated; N characters total)" note inside the prompt body.

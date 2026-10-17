@@ -7,6 +7,8 @@
  * @module dsh-prompt-optimizer/prompt
  */
 
+import { DEFAULTS } from './config.js';
+
 /** Ordered section titles used by the meta prompt, per meta-prompt locale. */
 export const SECTION_ORDER = Object.freeze({
   zh: Object.freeze(['目标', '现状与落点', '约束与规范', '任务拆解', '验收标准']),
@@ -30,7 +32,7 @@ const FACT_LABELS = Object.freeze({
  * @param {{ locale?: 'zh'|'en', maxOutputChars?: number }} input
  * @returns {number} Ceiling in characters (<=0 disables capping).
  */
-export function outputCeiling({ locale = 'zh', maxOutputChars = 600 } = {}) {
+export function outputCeiling({ locale = 'zh', maxOutputChars = DEFAULTS.maxOutputChars } = {}) {
   if (!(maxOutputChars > 0)) return 0;
   return locale === 'en' ? Math.round(maxOutputChars * 1.8) : maxOutputChars;
 }
@@ -42,7 +44,7 @@ export function outputCeiling({ locale = 'zh', maxOutputChars = 600 } = {}) {
  * @param {{ locale?: 'zh'|'en', maxOutputChars?: number }} input
  * @returns {{ kind: 'chars'|'words', value: number }} Target in the locale's native unit.
  */
-export function outputTarget({ locale = 'zh', maxOutputChars = 600 } = {}) {
+export function outputTarget({ locale = 'zh', maxOutputChars = DEFAULTS.maxOutputChars } = {}) {
   const chars = Math.max(120, Math.floor(maxOutputChars * 0.75));
   if (locale !== 'en') return { kind: 'chars', value: chars };
   // A Chinese-character's worth of information is about 3.2 English words.
@@ -156,7 +158,7 @@ function enSystem(maxOutputChars, detailed) {
  * @param {number} [input.maxOutputChars] - Output cap, written into the length rule.
  * @returns {{ system: string, user: string }} Prompts ready for `ctx.llm.stream`.
  */
-export function buildPrompts({ draft, facts, locale = 'zh', maxOutputChars = 1200 }) {
+export function buildPrompts({ draft, facts, locale = 'zh', maxOutputChars = DEFAULTS.maxOutputChars }) {
   const detailed = typeof draft === 'string' && draft.length >= 400;
   const system = locale === 'en' ? enSystem(maxOutputChars, detailed) : zhSystem(maxOutputChars, detailed);
   const trimmedFacts = typeof facts === 'string' ? facts.trim() : '';
@@ -197,7 +199,7 @@ const PREAMBLE_PATTERN = /^(以下是|下面是|这是|优化后的|您好|好�
  * @param {number} [maxChars] - Output cap (<=0 disables capping).
  * @returns {string} The cleaned prompt; an empty string means the model gave nothing.
  */
-export function finalizeOptimizedText(raw, maxChars = 1200) {
+export function finalizeOptimizedText(raw, maxChars = DEFAULTS.maxOutputChars) {
   let text = typeof raw === 'string' ? raw.trim() : '';
   if (text.length === 0) return '';
 

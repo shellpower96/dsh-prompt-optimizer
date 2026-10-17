@@ -150,6 +150,23 @@ test('finalizeOptimizedText: never writes explanatory text into the prompt body'
   assert.doesNotMatch(out, /truncated|characters total/);
 });
 
+test('every default derives from the single config default (no drift)', () => {
+  assert.equal(outputCeiling(), DEFAULTS.maxOutputChars);
+  assert.equal(outputCeiling({ locale: 'en' }), Math.round(DEFAULTS.maxOutputChars * 1.8));
+  assert.deepEqual(outputTarget(), { kind: 'chars', value: Math.floor(DEFAULTS.maxOutputChars * 0.75) });
+  // buildPrompts must not fall back to its own stale number.
+  const { system } = buildPrompts({ draft: '给登录加验证码', facts: '', locale: 'zh' });
+  assert.match(system, new RegExp(`正文不超过 ${Math.floor(DEFAULTS.maxOutputChars * 0.75)} 字`));
+});
+
+test('default budget is 400 chars: 300 字 / 94 words', () => {
+  assert.equal(DEFAULTS.maxOutputChars, 400);
+  assert.deepEqual(outputTarget({ locale: 'zh' }), { kind: 'chars', value: 300 });
+  assert.deepEqual(outputTarget({ locale: 'en' }), { kind: 'words', value: 94 });
+  assert.equal(outputCeiling({ locale: 'zh' }), 400);
+  assert.equal(outputCeiling({ locale: 'en' }), 720);
+});
+
 test('outputCeiling: one config number, locale-scaled characters', () => {
   assert.equal(outputCeiling({ locale: 'zh', maxOutputChars: 600 }), 600);
   assert.equal(outputCeiling({ locale: 'en', maxOutputChars: 600 }), 1080);

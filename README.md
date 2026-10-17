@@ -79,7 +79,7 @@ settings module of its own. Invalid values throw at activation with the field na
 | `enabled` | `true` | Master switch; `false` registers nothing |
 | `maxDraftChars` | `4000` | Reject longer drafts instead of sending them to the model |
 | `contextChars` | `8000` | Total character budget for the project-facts block |
-| `maxOutputChars` | `600` | Character cap for the optimized prompt, defined in Chinese characters; the English ceiling scales to 1.8x. The meta prompt targets 75% of it, so the hard cap only trims a runaway answer |
+| `maxOutputChars` | `400` | Character cap for the optimized prompt, defined in Chinese characters; the English ceiling scales to 1.8x. The meta prompt targets 75% of it, so the hard cap only trims a runaway answer |
 | `timeoutMs` | `120000` | Per-call timeout |
 | `docs` | `["AGENTS.md","README.md"]` | Workspace-relative documents read as facts, in order; missing files are skipped, absolute paths and `..` are rejected |
 | `includeGoal` | `true` | Include the session's current goal in the facts block |
@@ -103,12 +103,12 @@ The meta prompt pins five properties (`src/prompt.js`):
 
 ### Length budget
 
-With the default `maxOutputChars: 600`:
+With the default `maxOutputChars: 400`:
 
 | Locale | Target written into the meta prompt | Hard ceiling on the result | Token budget |
 |---|---|---|---|
-| zh | 450 字 | 600 characters | 500 |
-| en | 141 words | 1080 characters | 900 |
+| zh | 300 字 | 400 characters | 334 |
+| en | 94 words | 720 characters | 600 |
 
 The target sits below the ceiling on purpose, so a compliant answer is never truncated. If a model
 overruns anyway, `finalizeOptimizedText()` cuts at the last complete line (falling back to a sentence
@@ -150,7 +150,8 @@ project-context regression that drives the plugin with a caller-declared `docs` 
   means editing `index.js` and `client.js` together.
 - **Not a tool**: the plugin changes no system prompt and adds no agent tool.
 - **Length is a soft promise plus one hard cut**: models are asked to stay inside the budget; the cap is
-  only a guard rail. Raising `maxOutputChars` raises both the target and the ceiling.
+  only a guard rail. Raising `maxOutputChars` raises both the target and the ceiling. Every default in
+  `src/prompt.js` derives from this one config value, so they cannot drift apart.
 - Verified against **DSH 0.2.0-rc.2**. No `peerDependencies` are declared on purpose: DSH blocks
   installation on an incompatible peer, which would be worse than a documented version note.
 
