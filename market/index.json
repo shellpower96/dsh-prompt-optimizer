@@ -1,0 +1,45 @@
+{
+  "format": 1,
+  "title": { "en": "Shellpower DSH plugins", "zh": "Shellpower 的 DSH 插件" },
+  "description": {
+    "en": "Plugins published by shellpower96.",
+    "zh": "shellpower96 发布的 DSH 插件。"
+  },
+  "metadata": {
+    "categories": {
+      "composer": { "title": { "en": "Composer", "zh": "输入框" } }
+    },
+    "labels": {
+      "zero-config": { "title": { "en": "Zero config", "zh": "零配置" } },
+      "project-context": { "title": { "en": "Project-context aware", "zh": "结合项目规范" } },
+      "concise": { "title": { "en": "Concise output", "zh": "篇幅可控" } }
+    }
+  },
+  "plugins": [
+    {
+      "name": "dsh-smartprompt",
+      "title": { "en": "Smart Prompt", "zh": "智能提示词" },
+      "description": {
+        "en": "Rewrites a one-line composer draft into a structured prompt grounded in the project documents you declare (AGENTS.md / README.md), then fills it back into the composer. Reads the git branch and the session goal; caps output at 400 characters (Chinese) with boundary-safe trimming; every setting is injected by the caller, so the plugin assumes no project layout.",
+        "zh": "把输入框里的一句话草稿改写成结合你自声明项目文档（AGENTS.md / README.md）、git 分支与会话目标的结构化提示词并回填；输出按 400 字上限收口、超长在行边界截断；全部配置由调用方注入，插件不假设任何项目结构。"
+      },
+      "icon": "icons/dsh-smartprompt.svg",
+      "author": "shellpower96",
+      "homepage": "https://github.com/shellpower96/dsh-prompt-optimizer#readme",
+      "repository": { "url": "https://github.com/shellpower96/dsh-prompt-optimizer" },
+      "metadata": { "category": "composer", "labels": ["zero-config", "project-context", "concise"] },
+      "versions": [
+        {
+          "version": "0.1.0",
+          "publishTimestamp": 1792229321,
+          "source": {
+            "type": "git",
+            "url": "https://github.com/shellpower96/dsh-prompt-optimizer",
+            "commit": "5f6aae1ed2a22a79bfe09b796c0879f598272357"
+          },
+          "engines": { "dsh": ">=0.2.0-rc.2" }
+        }
+      ]
+    }
+  ]
+}
