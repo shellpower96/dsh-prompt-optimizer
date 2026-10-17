@@ -5,7 +5,7 @@
  * through the `/optimize-prompt` command, and any future agent tool must call
  * `optimizePrompt()` rather than reimplementing the flow.
  *
- * @module dsh-prompt-optimizer/optimize
+ * @module dsh-smartprompt/optimize
  */
 
 import { collectProjectFacts } from './facts.js';
@@ -120,7 +120,7 @@ function combineDeadline(signal, timeoutMs) {
 
   const timer = setTimeout(() => {
     if (outcome === 'none') outcome = 'timeout';
-    controller.abort(new Error('dsh-prompt-optimizer: timed out'));
+    controller.abort(new Error('dsh-smartprompt: timed out'));
   }, timeoutMs);
   timer.unref?.();
 

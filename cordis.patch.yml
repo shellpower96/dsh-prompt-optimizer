@@ -1,4 +1,4 @@
-# dsh-prompt-optimizer — DSH bundle
+# dsh-smartprompt — DSH bundle
 #
 # Host half: registers the human command `/optimize-prompt` (no model message).
 # Client half: renders the Smart Prompt button in `conversation.composer.dock`
@@ -9,5 +9,5 @@
 # config uses the documented defaults.
 - insert:
     - id: prompt-optimizer
-      name: 'dsh-prompt-optimizer'
+      name: 'dsh-smartprompt'
       config: {}

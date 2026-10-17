@@ -4,7 +4,7 @@
  * Pure functions only (no ctx, no I/O) so the behavior is unit-testable in
  * isolation and reusable outside DSH.
  *
- * @module dsh-prompt-optimizer/prompt
+ * @module dsh-smartprompt/prompt
  */
 
 import { DEFAULTS } from './config.js';

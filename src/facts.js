@@ -6,7 +6,7 @@
  *   让优化仍能基于草稿本身完成（“部分降级”优于“整次失败”）。
  * - 不 spawn 子进程：分支从 `.git/HEAD` 直接读，避免 git 调用的耗时与失败面。
  *
- * @module dsh-prompt-optimizer/facts
+ * @module dsh-smartprompt/facts
  */
 
 /** 单份文档最少分配的字符预算，避免 docs 很多时每份只剩几十字。 */

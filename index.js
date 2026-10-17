@@ -1,5 +1,5 @@
 /**
- * dsh-prompt-optimizer — Host half.
+ * dsh-smartprompt — Host half.
  *
  * Registers the human slash command `/optimize-prompt`:
  * - The handler runs directly against the Agent, so no model message is created
@@ -15,14 +15,14 @@
  * extend; `ctx.commands` + `ctx.remote.commands.execute` is the supported entry
  * point for "a UI action calls a Host operation".
  *
- * @module dsh-prompt-optimizer
+ * @module dsh-smartprompt
  */
 
 import { DEFAULTS, validateConfig } from './src/config.js';
 import { optimizePrompt } from './src/optimize.js';
 
 /** Plugin name; equals the package name the bundle patch inserts. */
-export const name = 'dsh-prompt-optimizer';
+export const name = 'dsh-smartprompt';
 
 /** Hard dependencies: command registration plus model and file access. */
 export const inject = ['commands', 'fs', 'llm'];
@@ -55,6 +55,6 @@ export function apply(ctx, config) {
       recordInput: false,
       handler: (invocation) => optimizePrompt({ ctx, cfg, invocation }),
     }),
-    'dsh-prompt-optimizer: command',
+    'dsh-smartprompt: command',
   );
 }

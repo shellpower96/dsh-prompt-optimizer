@@ -51,7 +51,7 @@ function fixedLlm(text) {
 }
 
 test('manifest constants are stable', () => {
-  assert.equal(name, 'dsh-prompt-optimizer');
+  assert.equal(name, 'dsh-smartprompt');
   assert.deepEqual(inject, ['commands', 'fs', 'llm']);
   assert.equal(COMMAND.name, 'optimize-prompt');
 });

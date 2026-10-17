@@ -1,5 +1,5 @@
 window.__ModuleLoader__.load({
-  id: 'dsh-prompt-optimizer',
+  id: 'dsh-smartprompt',
   factory(require) {
     const React = require('react');
     const h = React.createElement;
@@ -277,7 +277,7 @@ window.__ModuleLoader__.load({
           signal,
         );
 
-        ctx.effect(() => ctx.locale.register(NS, { zh, en }), 'dsh-prompt-optimizer: dictionaries');
+        ctx.effect(() => ctx.locale.register(NS, { zh, en }), 'dsh-smartprompt: dictionaries');
 
         ctx.slots.inject('conversation.composer.dock', () => ctx.slots.register({
           name: 'conversation.composer.dock',

@@ -1,7 +1,7 @@
 /**
  * 项目事实采集与优化编排的单测：用假 fs / 假 llm / 假 ctx 覆盖降级与失败面。
  *
- * 运行：cd .dsh/plugins/dsh-prompt-optimizer && node --test
+ * 运行：cd /home/ubuntu/dsh-prompt-optimizer && node --test
  */
 import assert from 'node:assert/strict';
 import { test } from 'node:test';

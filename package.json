@@ -1,5 +1,5 @@
 {
-  "name": "dsh-prompt-optimizer",
+  "name": "dsh-smartprompt",
   "version": "0.1.0",
   "description": "DSH Web plugin: a Smart Prompt button under the composer that rewrites your draft into a structured prompt using your workspace conventions, then fills it back into the composer.",
   "license": "MIT",
@@ -29,7 +29,8 @@
     "LICENSE"
   ],
   "engines": {
-    "node": ">=20"
+    "node": ">=20",
+    "dsh": ">=0.2.0-rc.2"
   },
   "keywords": [
     "dsh",
@@ -37,7 +38,9 @@
     "dsh-bundle",
     "prompt",
     "prompt-engineering",
-    "composer"
+    "composer",
+    "smart-prompt",
+    "concise"
   ],
   "scripts": {
     "test": "node --test"
