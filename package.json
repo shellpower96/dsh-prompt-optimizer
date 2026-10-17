@@ -54,5 +54,13 @@
         "@deepseek-ai/dsh-client-ui-chat"
       ]
     }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shellpower96/dsh-prompt-optimizer.git"
+  },
+  "homepage": "https://github.com/shellpower96/dsh-prompt-optimizer#readme",
+  "bugs": {
+    "url": "https://github.com/shellpower96/dsh-prompt-optimizer/issues"
   }
 }

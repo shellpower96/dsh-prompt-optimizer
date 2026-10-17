@@ -25,7 +25,7 @@ DSH's plugin catalog is the package manager itself — there is no separate subm
 Install this bundle from its git repository:
 
 ```text
-plugin_manager(action="install_bundle", target="github:<owner>/dsh-prompt-optimizer@v0.1.0")
+plugin_manager(action="install_bundle", target="github:shellpower96/dsh-prompt-optimizer#v0.1.0")
 ```
 
 ...or from a local checkout while developing:
