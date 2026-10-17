@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Smart Prompt",
+    "description": "Adds a Smart Prompt button under the composer: reads the session workspace conventions and rewrites your draft into a structured prompt, then fills it back into the composer."
+  }
+}
