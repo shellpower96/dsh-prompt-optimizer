@@ -1,4 +1,4 @@
-# dsh-prompt-optimizer
+# dsh-smartprompt
 
 A [DSH](https://github.com/deepseek-ai/deepseek-harness) Web plugin that adds a **Smart Prompt** button
 under the composer. Click it and your rough draft is rewritten into a structured, executable prompt
@@ -20,6 +20,18 @@ grounded in your workspace conventions — then filled straight back into the co
 中文摘要见文末。
 
 ## Install
+
+Three routes, in order of availability today:
+
+| Route | Command | Status |
+|---|---|---|
+| Git (works now) | `plugin_manager(action="install_bundle", target="github:shellpower96/dsh-prompt-optimizer#v0.1.0")` | ✅ published |
+| DSH Discover (market index) | add `https://raw.githubusercontent.com/shellpower96/dsh-prompt-optimizer/main/market/index.json` as an index source | ✅ published |
+| npm | `npm i -g dsh-smartprompt` / `install_bundle dsh-smartprompt` | ⏳ name reserved, publish pending |
+
+The package name is **`dsh-smartprompt`** (the npm name `dsh-prompt-optimizer` already belongs to a
+different project). The repository keeps its original name, so every git spec stays valid.
+
 
 DSH's plugin catalog is the package manager itself — there is no separate submission portal.
 Install this bundle from its git repository:
